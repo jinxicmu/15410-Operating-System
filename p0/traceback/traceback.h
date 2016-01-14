@@ -9,11 +9,14 @@
 #ifndef __traceback_h_
 #define __traceback_h_
 
+#define u32 (unsigned int)
 #include <stdio.h>
 
 /*
  * The traceback function that is the heart of the library
  */
 void traceback(FILE *);
-
+void* read_ebp(void);
+int get_func_in_table_given_addr(void* addr);
+bool is_print_string(char* str);
 #endif /* __traceback_h_ */

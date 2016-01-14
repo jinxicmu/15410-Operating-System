@@ -27,7 +27,6 @@ add_one1:
 	popl	%esi
 	popl	%ebx
 	popl	%edi
-	movl	%ebp,%esp
 	popl	%ebp
 	ret
 
