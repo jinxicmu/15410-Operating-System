@@ -16,8 +16,8 @@ int* read_ebp();
 int get_func_in_table_given_addr(void* addr);
 void print_func_to_file(int i, void* addr, FILE* fp);
 void print_string(char* str, FILE* fp);
-void print_string_array(argsym_t* argu, char** arr, FILE* fp);
-void print_argu_to_file(argsym_t* argu, void* base, FILE* fp);
+void print_string_array(char** arr, FILE* fp);
+void print_argu_to_file(argsym_t argu, void* base, FILE* fp);
 bool is_print_string(char* str);
 void traceback(FILE *fp);
 
@@ -38,18 +38,19 @@ void print_func_to_file(int i, void* addr, FILE* fp) {
 	if (i == -1) {
 		fprintf(fp, "Function %p(...), in\n", addr);
 		return;	
-	}
+	} else {
 	functsym_t func = functions[i];	
 	fprintf(fp, "Function %s", func.name);
 	fprintf(fp, "(");
 	int j;
-	for (j = 0; func.args[j].name != '\0'; j++) {
+	for (j = 0; j < ARGS_MAX_NUM && func.args[j].name[0] != '\0'; j++) {
 		if (j != 0) {
 			fprintf(fp, ", ");
 		}
-		print_argu_to_file(&(func.args[j]), addr, fp);
+		print_argu_to_file(func.args[j], addr, fp);
 	}
 	fprintf(fp, "), in\n");
+	}
 }
 
 void print_string(char* str, FILE* fp) {
@@ -73,7 +74,7 @@ void print_string(char* str, FILE* fp) {
 	}
 }
 
-void print_string_array(argsym_t* argu, char** arr, FILE* fp) {
+void print_string_array(char** arr, FILE* fp) {
 	int i = 0;
 	fprintf(fp, "{");
 	while (i < 4) {
@@ -91,20 +92,24 @@ void print_string_array(argsym_t* argu, char** arr, FILE* fp) {
 	fprintf(fp, "}");
 }
 
-void print_argu_to_file(argsym_t* argu, void* base, FILE* fp) {
-	void* addr = base + argu->offset;
-	switch(argu->type) {
-		case 0: fprintf(fp, "char %s=\'%c\'", argu->name, *(char*)addr);
-		case 1: fprintf(fp, "int %s=%d", argu->name, *(int*)addr);
-		case 2: fprintf(fp, "float %s=%f", argu->name, *(float*)addr);
-		case 3: fprintf(fp, "double %s=%lf", argu->name, *(double*)addr);
+void print_argu_to_file(argsym_t argu, void* ebp, FILE* fp) {
+	void* addr = (void*)(ebp + argu.offset);
+	switch(argu.type) {
+		case 0: fprintf(fp, "char %s=\'%c\'", argu.name, *((char*)addr));
+				break;
+		case 1: fprintf(fp, "int %s=%d", argu.name, *((int*)addr));
+				break;
+		case 2: fprintf(fp, "float %s=%f", argu.name, *(float*)addr);
+				break;/*
+		case 3: fprintf(fp, "double %s=%lf", argu.name, *(double*)addr);
 		case 4: {
-					fprintf(fp, "char* %s=", argu->name);
+					fprintf(fp, "char* %s=", argu.name);
 					print_string((char*)addr, fp);
 				}
-		case 5: print_string_array(argu, (char**)addr, fp);
-		case 6: fprintf(fp, "void* %s=0v%x", argu->name, (unsigned int)addr);
-		default: fprintf(fp, "unkown %s=0x%x", argu->name, (unsigned int)addr);
+		case 5: print_string_array((char**)addr, fp);
+		case 6: fprintf(fp, "void* %s=0v%x", argu.name, (unsigned int)addr);
+*/		default: fprintf(fp, "unkown %s=0x%x", argu.name, (unsigned int)addr);
+				break;
 	}
 }
 
@@ -126,8 +131,15 @@ void traceback(FILE *fp)
 	 * the symbol. So be sure to always do something with functions */
 
 	/* remove this line once you've got real code here */
-	void* p = (void*)read_ebp();
-	int index = get_func_in_table_given_addr(p);
-	print_func_to_file(index, p, fp);
+	int* ebp0 = (int*)read_ebp();
+	int* traceback_ebp = (int*)(*ebp0);
+	int* old_ebp = (int*)(*traceback_ebp);
+	int ret_addr = *(old_ebp + 1);
+	int* offset_addr = (int*)(ret_addr - 4);
+	int offset = *offset_addr;
+	void* func_addr = (void*)(ret_addr + offset);
+
+	int index = get_func_in_table_given_addr(func_addr);
+	print_func_to_file(index, (void*)old_ebp, fp);
 }
 

@@ -5,7 +5,7 @@ read_ebp:
 	pushl %ebp
 	movl %esp, %ebp
 	
-		movl (%ebp),%eax
+		movl %ebp,%eax
 
 	popl %ebp
 	ret
