@@ -88,6 +88,9 @@ $(TEST_PROGS) tests/verify_test: %: %.o libtraceback.a
 tests/add_one_test: tests/add_one.o tests/add_one_test.o
 	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS)
 
+traceback/traceback: traceback/read_ebp.o traceback/traceback.o
+	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS)
+
 html_doc:
 	$(DOC) doxygen.conf
 

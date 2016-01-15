@@ -15,7 +15,7 @@ TABSTOP = 8
 # Object files that should be linked into the traceback library
 # go here.
 #
-MY_TRACEBACK_OBJS = traceback.o
+MY_TRACEBACK_OBJS = traceback.o read_ebp.o
 
 #
 # Specifies the method for acquiring and project updates. This should be
