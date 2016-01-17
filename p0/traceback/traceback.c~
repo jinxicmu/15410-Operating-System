@@ -110,10 +110,10 @@ void print_argu_to_file(argsym_t argu, int* ebp, FILE* fp) {
 		case 3: fprintf(fp, "double %s=%lf", argu.name, *(double*)addr);
 				break;
 		case 4: fprintf(fp, "char *%s=", argu.name);
-				print_string((char*)(*(unsigned long *)addr), fp);
+				print_string((char*)addr, fp);
 				break;
 		case 5: fprintf(fp, "char **%s=",argu.name);
-				print_string_array((char**)(*(unsigned long *)addr), fp);
+				print_string_array((char**)addr, fp);
 				break;
 		case 6: fprintf(fp, "void *%s=0v%x", argu.name, (unsigned int)addr);
 				break;
@@ -125,6 +125,7 @@ void print_argu_to_file(argsym_t argu, int* ebp, FILE* fp) {
 bool is_print_string(char* str) {
 	int i;
 	for (i = 0; str[i] != '\0';i++) {
+		printf("%c", str[i]);
 		if (isprint((int)str[i]) == 0) {
 			return false;
 		}
